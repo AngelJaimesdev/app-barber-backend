@@ -5,7 +5,9 @@ import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '../common/enums/role.enum';
+import { User } from '../users/entities/user.entity';
 
 @ApiTags('Promotions')
 @Controller('promotions')
@@ -22,17 +24,17 @@ export class PromotionsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  create(@Body() dto: CreatePromotionDto) { return this.promotionsService.create(dto); }
+  create(@Body() dto: CreatePromotionDto, @CurrentUser() user: User) { return this.promotionsService.create(dto, user); }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  update(@Param('id') id: string, @Body() dto: Partial<CreatePromotionDto>) { return this.promotionsService.update(id, dto); }
+  update(@Param('id') id: string, @Body() dto: Partial<CreatePromotionDto>, @CurrentUser() user: User) { return this.promotionsService.update(id, dto, user); }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  remove(@Param('id') id: string) { return this.promotionsService.remove(id); }
+  remove(@Param('id') id: string, @CurrentUser() user: User) { return this.promotionsService.remove(id, user); }
 }

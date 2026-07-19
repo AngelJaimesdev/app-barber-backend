@@ -40,8 +40,8 @@ export class BarbersController {
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Agregar barbero a una barbería' })
-  create(@Body() dto: CreateBarberDto) {
-    return this.barbersService.create(dto);
+  create(@Body() dto: CreateBarberDto, @CurrentUser() user: User) {
+    return this.barbersService.create(dto, user);
   }
 
   @Patch('me')
@@ -51,16 +51,16 @@ export class BarbersController {
   async updateMe(@CurrentUser() user: User, @Body() dto: Partial<CreateBarberDto>) {
     const barber = await this.barbersService.findMe(user.id);
     if (!barber) throw new NotFoundException('Perfil de barbero no encontrado');
-    return this.barbersService.update(barber.id, dto);
+    return this.barbersService.update(barber.id, dto, user);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.OWNER, Role.BARBER)
+  @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Actualizar perfil de barbero' })
-  update(@Param('id') id: string, @Body() dto: Partial<CreateBarberDto>) {
-    return this.barbersService.update(id, dto);
+  @ApiOperation({ summary: 'Actualizar perfil de barbero (dueño de la barbería o admin; el barbero usa /me)' })
+  update(@Param('id') id: string, @Body() dto: Partial<CreateBarberDto>, @CurrentUser() user: User) {
+    return this.barbersService.update(id, dto, user);
   }
 
   @Delete(':id')
@@ -68,7 +68,7 @@ export class BarbersController {
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Desactivar barbero' })
-  remove(@Param('id') id: string) {
-    return this.barbersService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.barbersService.remove(id, user);
   }
 }

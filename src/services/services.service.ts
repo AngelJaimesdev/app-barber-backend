@@ -3,12 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
+import { BarbershopAccessService } from '../common/services/barbershop-access.service';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ServicesService {
-  constructor(@InjectRepository(Service) private repo: Repository<Service>) {}
+  constructor(
+    @InjectRepository(Service) private repo: Repository<Service>,
+    private access: BarbershopAccessService,
+  ) {}
 
-  create(dto: CreateServiceDto) {
+  async create(dto: CreateServiceDto, user: User) {
+    await this.access.assertCanManage(dto.barbershopId, user);
     const service = this.repo.create(dto);
     return this.repo.save(service);
   }
@@ -24,14 +30,16 @@ export class ServicesService {
     return service;
   }
 
-  async update(id: string, dto: Partial<CreateServiceDto>) {
-    await this.findOne(id);
+  async update(id: string, dto: Partial<CreateServiceDto>, user: User) {
+    const service = await this.findOne(id);
+    await this.access.assertCanManage(service.barbershopId, user);
     await this.repo.update(id, dto);
     return this.findOne(id);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, user: User) {
+    const service = await this.findOne(id);
+    await this.access.assertCanManage(service.barbershopId, user);
     await this.repo.update(id, { isActive: false });
     return { message: 'Servicio desactivado' };
   }

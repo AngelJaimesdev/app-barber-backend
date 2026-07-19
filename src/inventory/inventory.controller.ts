@@ -5,7 +5,9 @@ import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '../common/enums/role.enum';
+import { User } from '../users/entities/user.entity';
 
 @ApiTags('Inventory')
 @ApiBearerAuth()
@@ -16,20 +18,20 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Post()
-  create(@Body() dto: CreateInventoryItemDto) { return this.inventoryService.create(dto); }
+  create(@Body() dto: CreateInventoryItemDto, @CurrentUser() user: User) { return this.inventoryService.create(dto, user); }
 
   @Get()
-  findAll(@Query('barbershopId') barbershopId: string) { return this.inventoryService.findAll(barbershopId); }
+  findAll(@Query('barbershopId') barbershopId: string, @CurrentUser() user: User) { return this.inventoryService.findAll(barbershopId, user); }
 
   @Get('low-stock')
-  getLowStock(@Query('barbershopId') barbershopId: string) { return this.inventoryService.getLowStock(barbershopId); }
+  getLowStock(@Query('barbershopId') barbershopId: string, @CurrentUser() user: User) { return this.inventoryService.getLowStock(barbershopId, user); }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { return this.inventoryService.findOne(id); }
+  findOne(@Param('id') id: string, @CurrentUser() user: User) { return this.inventoryService.findOne(id, user); }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateInventoryItemDto>) { return this.inventoryService.update(id, dto); }
+  update(@Param('id') id: string, @Body() dto: Partial<CreateInventoryItemDto>, @CurrentUser() user: User) { return this.inventoryService.update(id, dto, user); }
 
   @Delete(':id')
-  remove(@Param('id') id: string) { return this.inventoryService.remove(id); }
+  remove(@Param('id') id: string, @CurrentUser() user: User) { return this.inventoryService.remove(id, user); }
 }

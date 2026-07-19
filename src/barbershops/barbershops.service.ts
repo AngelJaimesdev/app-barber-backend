@@ -50,7 +50,12 @@ export class BarbershopsService {
     return { message: 'Barbería desactivada' };
   }
 
-  async getReports(barbershopId: string) {
+  async getReports(barbershopId: string, user: User) {
+    const barbershop = await this.findOne(barbershopId);
+    if (user.role !== Role.SUPER_ADMIN && barbershop.ownerId !== user.id) {
+      throw new ForbiddenException('No tienes permiso para ver los reportes de esta barbería');
+    }
+
     const [total, completed, cancelled, pending, confirmed] = await Promise.all([
       this.apptRepo.count({ where: { barbershopId } }),
       this.apptRepo.count({ where: { barbershopId, status: 'COMPLETED' as any } }),

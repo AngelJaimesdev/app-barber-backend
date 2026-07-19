@@ -58,7 +58,7 @@ export class BarbershopsController {
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Reportes de la barbería (citas, ingresos, top servicios)' })
-  getReports(@Param('id') id: string) {
-    return this.barbershopsService.getReports(id);
+  getReports(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.barbershopsService.getReports(id, user);
   }
 }

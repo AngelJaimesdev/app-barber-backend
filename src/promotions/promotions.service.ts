@@ -3,12 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Promotion } from './entities/promotion.entity';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
+import { BarbershopAccessService } from '../common/services/barbershop-access.service';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class PromotionsService {
-  constructor(@InjectRepository(Promotion) private repo: Repository<Promotion>) {}
+  constructor(
+    @InjectRepository(Promotion) private repo: Repository<Promotion>,
+    private access: BarbershopAccessService,
+  ) {}
 
-  create(dto: CreatePromotionDto) {
+  async create(dto: CreatePromotionDto, user: User) {
+    await this.access.assertCanManage(dto.barbershopId, user);
     return this.repo.save(this.repo.create(dto));
   }
 
@@ -22,14 +28,16 @@ export class PromotionsService {
     return p;
   }
 
-  async update(id: string, dto: Partial<CreatePromotionDto>) {
-    await this.findOne(id);
+  async update(id: string, dto: Partial<CreatePromotionDto>, user: User) {
+    const p = await this.findOne(id);
+    await this.access.assertCanManage(p.barbershopId, user);
     await this.repo.update(id, dto);
     return this.findOne(id);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, user: User) {
+    const p = await this.findOne(id);
+    await this.access.assertCanManage(p.barbershopId, user);
     await this.repo.update(id, { isActive: false });
     return { message: 'Promoción desactivada' };
   }

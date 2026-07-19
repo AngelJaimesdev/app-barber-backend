@@ -25,8 +25,8 @@ export class AppointmentsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener cita por ID' })
-  findOne(@Param('id') id: string) {
-    return this.appointmentsService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.appointmentsService.findOne(id, user);
   }
 
   @Post()
@@ -41,8 +41,8 @@ export class AppointmentsController {
   @Roles(Role.SUPER_ADMIN, Role.OWNER, Role.BARBER)
   @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'Actualizar estado de cita (barbero/owner/admin)' })
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto) {
-    return this.appointmentsService.updateStatus(id, dto);
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto, @CurrentUser() user: User) {
+    return this.appointmentsService.updateStatus(id, dto, user);
   }
 
   @Patch(':id/reschedule')
